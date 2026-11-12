@@ -1,4 +1,13 @@
 pub mod random;
+/// Which way is "better"?
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Direction {
+    /// Lower y is better (for example, loss).
+    Minimize,
+    /// Higher y is better (for example, accuracy).
+    Maximize,
+}
+
 /// The best point found by a search
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Best {
