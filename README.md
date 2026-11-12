@@ -11,8 +11,9 @@ for Python and PyTorch.
 
 ## Roadmap
 
-- [ ] Grid search on one variable
-- [ ] Random search
+- [x] Grid search on one variable
+- [x] Random search
+- [x] Direction (minimize or maximize)
 - [ ] Trial history and SQLite storage
 - [ ] Python bindings
 
