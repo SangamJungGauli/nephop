@@ -1,0 +1,16 @@
+# <type>(<scope>): <summary>   (max 72 chars, imperative, lowercase, no full stop)
+# Types: feat fix docs test refactor perf build ci chore revert
+# Scopes: core, sampler, pruner, storage, cli, python, examples, repo
+#
+# Body: what changed and WHY (wrap at ~72 chars). Delete these comment lines.
+#
+# Trailers (delete what does not apply):
+# Refs: #
+# Perf: before/after numbers (for perf commits)
+# Reviewed-by:
+# BREAKING CHANGE: (public API, storage schema or CLI flag change; add the migration)
+#
+# Checklist before committing:
+#  - one logical change per commit (don't mix refactors with new features)
+#  - nothing private or large staged: no .db files, no target/ (check git status)
+#  - cargo fmt, cargo clippy -- -D warnings and cargo test all pass
