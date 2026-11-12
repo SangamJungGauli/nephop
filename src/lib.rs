@@ -1,3 +1,4 @@
+pub mod random;
 /// The best point found by a search
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Best {

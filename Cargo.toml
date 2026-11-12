@@ -11,3 +11,4 @@ categories = ["science"]
 rust-version = "1.85"
 
 [dependencies]
+rand = "0.10.3"
