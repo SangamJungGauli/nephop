@@ -5,6 +5,9 @@ edition = "2024"
 description = "Nepalese Hyperparameter Optimizer"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/YOUR_USERNAME/nephop"
+repository = "https://github.com/SangamJungGauli/nephop"
+keywords = ["optimization", "hyperparameter", "machine-learning"]
+categories = ["science"]
+rust-version = "1.85"
 
 [dependencies]
