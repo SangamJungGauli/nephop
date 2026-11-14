@@ -27,11 +27,13 @@ impl Yatra {
     }
 
     /// The Lakshya (लक्ष्य, "goal"): the best Paila found, judged by the
-    /// Yatra's direction. Returns None if there are no paila yet.
+    /// Yatra's direction. Returns None if there are no paila
+    /// yet or if every score is NaN or infinite (those are skipped)
     pub fn lakshya(&self) -> Option<&Paila> {
+        let finite = self.paila.iter().filter(|p| p.y.is_finite());
         match self.direction {
-            Direction::Minimize => self.paila.iter().min_by(|a, b| a.y.total_cmp(&b.y)),
-            Direction::Maximize => self.paila.iter().max_by(|a, b| a.y.total_cmp(&b.y)),
+            Direction::Minimize => finite.min_by(|a, b| a.y.total_cmp(&b.y)),
+            Direction::Maximize => finite.max_by(|a, b| a.y.total_cmp(&b.y)),
         }
     }
 }
@@ -108,6 +110,30 @@ mod tests {
         let a = random_search(&xy_space(), bowl, 10, 7, Direction::Minimize);
         let b = random_search(&xy_space(), bowl, 10, 7, Direction::Minimize);
         assert_eq!(a.paila, b.paila);
+    }
+
+    #[test]
+    fn nan_is_never_the_lakshya() {
+        let mut yatra = Yatra::new(Direction::Maximize);
+        for y in [1.0, f64::NAN, 5.0, 2.0] {
+            yatra.paila.push(Paila {
+                params: Params::default(),
+                y,
+            });
+        }
+        assert_eq!(yatra.lakshya().unwrap().y, 5.0)
+    }
+
+    #[test]
+    fn all_nan_yatra_has_no_lakshya() {
+        let mut yatra = Yatra::new(Direction::Minimize);
+        for y in [f64::NAN, f64::NAN, f64::NAN] {
+            yatra.paila.push(Paila {
+                params: Params::default(),
+                y,
+            });
+        }
+        assert!(yatra.lakshya().is_none());
     }
 
     #[test]
