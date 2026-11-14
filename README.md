@@ -9,12 +9,15 @@ for Python and PyTorch.
 
     cargo run
 
+Runs a demo that tunes a learning rate, batch size and optimizer on a
+pretend loss function and prints the best settings found.
+
 ## Roadmap
 
 - [x] Random search
 - [x] Direction (minimize or maximize)
 - [x] Search space with several parameters (Kshetra)
-- [ ] Categorical parameters
+- [x] Categorical parameters
 - [ ] Ask/tell API and Sampler trait
 - [ ] Grid search over a Kshetra
 - [ ] Trial history and SQLite storage

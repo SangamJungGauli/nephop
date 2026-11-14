@@ -146,4 +146,20 @@ mod tests {
     fn duplicate_names_are_rejected() {
         let _ = Kshetra::new().float("x", 0.0, 1.0).float("x", 0.0, 1.0);
     }
+
+    #[test]
+    fn choice_only_returns_listed_options() {
+        let options = ["adam", "sgd", "rmsprop"];
+        let kshetra = Kshetra::new().choice("optimizer", &options);
+        let yatra = random_search(&kshetra, |_| 0.0, 200, 1, Direction::Maximize);
+        for paila in &yatra.paila {
+            assert!(options.contains(&paila.params.choice("optimizer")));
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "need at least one choice")]
+    fn empty_choice_list_is_rejected() {
+        let _ = Kshetra::new().choice("x", &[]);
+    }
 }
