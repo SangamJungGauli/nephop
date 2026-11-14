@@ -14,7 +14,7 @@ for Python and PyTorch.
 - [x] Random search
 - [x] Direction (minimize or maximize)
 - [x] Search space with several parameters (Kshetra)
-- [ ] Categorical parameters
+- [x] Categorical parameters
 - [ ] Ask/tell API and Sampler trait
 - [ ] Grid search over a Kshetra
 - [ ] Trial history and SQLite storage

@@ -12,7 +12,8 @@ fn main() {
 
     let kshetra = Kshetra::new()
         .log_float("lr", 1e-5, 1e-1)
-        .int("batch", 8, 256);
+        .int("batch", 8, 256)
+        .choice("optimizer", &["adam", "sgd"]);
 
     let yatra = random_search(&kshetra, loss, 500, 42, Direction::Minimize);
 
@@ -21,6 +22,7 @@ fn main() {
         println!("Lakshya:");
         println!("  lr    = {:.5}", lakshya.params.float("lr"));
         println!("  batch = {}", lakshya.params.int("batch"));
+        println!("  optim = {}", lakshya.params.choice("optimizer"));
         println!("  loss  = {:.4}", lakshya.y);
     }
 }

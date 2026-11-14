@@ -3,10 +3,11 @@ use rand::rngs::StdRng;
 use std::collections::HashMap;
 
 /// A concrete number chosen for one parameter.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Float(f64),
     Int(i64),
+    Str(String),
 }
 
 /// The allowed range for one parameter.
@@ -18,16 +19,18 @@ pub enum Param {
     Float { low: f64, high: f64, log: bool },
     /// A whole number between `low` and `high` (both included).
     Int { low: i64, high: i64 },
+    /// one option out of fixed list (for example, an optimizer name).
+    Categorical { choices: Vec<String> },
 }
 
 impl Param {
     fn sample(&self, rng: &mut StdRng) -> Value {
-        match *self {
+        match self {
             Param::Float {
                 low,
                 high,
                 log: false,
-            } => Value::Float(rng.random_range(low..=high)),
+            } => Value::Float(rng.random_range(*low..=*high)),
             Param::Float {
                 low,
                 high,
@@ -35,9 +38,13 @@ impl Param {
             } => {
                 let exponent = rng.random_range(low.ln()..=high.ln());
                 // Rounding can push the result a hair outside the range.
-                Value::Float(exponent.exp().clamp(low, high))
+                Value::Float(exponent.exp().clamp(*low, *high))
             }
-            Param::Int { low, high } => Value::Int(rng.random_range(low..=high)),
+            Param::Int { low, high } => Value::Int(rng.random_range(*low..=*high)),
+            Param::Categorical { choices } => {
+                let i = rng.random_range(0..choices.len());
+                Value::Str(choices[i].clone())
+            }
         }
     }
 }
@@ -50,7 +57,7 @@ pub struct Params {
 
 impl Params {
     pub fn get(&self, name: &str) -> Option<Value> {
-        self.values.get(name).copied()
+        self.values.get(name).cloned()
     }
 
     /// The float parameter called `name`.
@@ -61,6 +68,17 @@ impl Params {
         match self.get(name) {
             Some(Value::Float(v)) => v,
             _ => panic!("no float parameter named `{name}`"),
+        }
+    }
+
+    /// The chosen option for the categorical parameter called `name`.
+    ///
+    /// # Panics
+    /// If there is no categorical parameter with that name (usually a typo).
+    pub fn choice(&self, name: &str) -> &str {
+        match self.values.get(name) {
+            Some(Value::Str(s)) => s,
+            _ => panic!("no categorical parameter named `{name}`"),
         }
     }
 
@@ -131,6 +149,13 @@ impl Kshetra {
     pub fn int(self, name: &str, low: i64, high: i64) -> Self {
         assert!(low <= high, "`{name}`: low must not be above high");
         self.add(name, Param::Int { low, high })
+    }
+
+    /// Add a parameter that takes one option from `choices`.
+    pub fn choice(self, name: &str, choices: &[&str]) -> Self {
+        assert!(!choices.is_empty(), "`{name}`: need at least one choice");
+        let choices = choices.iter().map(|c| c.to_string()).collect();
+        self.add(name, Param::Categorical { choices })
     }
 
     /// Pick one random value for every parameter.
