@@ -125,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn all_nan_yatra_has_no_laksya() {
+    fn all_nan_yatra_has_no_lakshya() {
         let mut yatra = Yatra::new(Direction::Minimize);
         for y in [f64::NAN, f64::NAN, f64::NAN] {
             yatra.paila.push(Paila {
