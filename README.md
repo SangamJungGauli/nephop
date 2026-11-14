@@ -11,9 +11,12 @@ for Python and PyTorch.
 
 ## Roadmap
 
-- [x] Grid search on one variable
 - [x] Random search
 - [x] Direction (minimize or maximize)
+- [x] Search space with several parameters (Kshetra)
+- [ ] Categorical parameters
+- [ ] Ask/tell API and Sampler trait
+- [ ] Grid search over a Kshetra
 - [ ] Trial history and SQLite storage
 - [ ] Python bindings
 
