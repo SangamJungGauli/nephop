@@ -2,7 +2,7 @@ use rand::RngExt;
 use rand::rngs::StdRng;
 use std::collections::HashMap;
 
-/// A concrete number chosen for one parameter.
+/// A concrete value chosen for one parameter.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Float(f64),
