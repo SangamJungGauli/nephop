@@ -1,4 +1,5 @@
 pub mod random;
+pub mod sampler;
 pub mod space;
 /// Which way is "better"?
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
