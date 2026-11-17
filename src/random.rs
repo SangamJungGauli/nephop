@@ -1,17 +1,21 @@
 use crate::Disha;
 use crate::sampler::{RandomSampler, Sampler};
 use crate::space::{Kshetra, Params};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fs;
+use std::path::Path;
 
 /// A Paila (पाइला, "step"): one attempt, the settings we tried and the
 /// score `y` they gave.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Paila {
     pub params: Params,
     pub y: f64,
 }
 
 /// A Yatra (यात्रा, "journey"): one complete search, with every Paila in order.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Yatra {
     pub disha: Disha,
     pub paila: Vec<Paila>,
@@ -55,6 +59,19 @@ impl Yatra {
     /// English name for `bhana`.
     pub fn tell(&mut self, params: Params, y: f64) {
         self.bhana(params, y)
+    }
+
+    /// Save this Yatra to a JSON file, replacing the file if it exists.
+    pub fn save(&self, path: impl AsRef<Path>) -> Result<(), Box<dyn Error>> {
+        let json = serde_json::to_string_pretty(self)?;
+        fs::write(path, json)?;
+        Ok(())
+    }
+
+    /// Load a Yatra from a JSON file written by `save`.
+    pub fn load(path: impl AsRef<Path>) -> Result<Yatra, Box<dyn Error>> {
+        let json = fs::read_to_string(path)?;
+        Ok(serde_json::from_str(&json)?)
     }
 }
 
@@ -206,5 +223,27 @@ mod tests {
         yatra.tell(params, 1.5);
         assert_eq!(yatra.paila.len(), 1);
         assert_eq!(yatra.paila[0].y, 1.5);
+    }
+
+    #[test]
+    fn save_then_load_gives_the_same_yatra() {
+        let kshetra = Kshetra::new()
+            .log_float("lr", 1e-5, 1e-1)
+            .int("batch", 8, 256)
+            .choice("optimizer", &["adam", "sgd"]);
+        let yatra = random_search(&kshetra, |_| 1.5, 20, 3, Disha::Chuchuro);
+
+        let path = std::env::temp_dir().join("nephop_round_trip_test.json");
+        yatra.save(&path).unwrap();
+        let loaded = Yatra::load(&path).unwrap();
+        std::fs::remove_file(&path).unwrap();
+
+        assert_eq!(loaded.disha, yatra.disha);
+        assert_eq!(loaded.paila, yatra.paila);
+    }
+
+    #[test]
+    fn loading_a_missing_file_is_an_error() {
+        assert!(Yatra::load("no_such_folder/no_such_file.json").is_err());
     }
 }
