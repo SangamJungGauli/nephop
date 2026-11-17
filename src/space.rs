@@ -1,9 +1,10 @@
 use rand::RngExt;
 use rand::rngs::StdRng;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// A concrete value chosen for one parameter.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Value {
     Float(f64),
     Int(i64),
@@ -50,7 +51,7 @@ impl Param {
 }
 
 /// The values chosen for one Paila, looked up by name.
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct Params {
     values: HashMap<String, Value>,
 }

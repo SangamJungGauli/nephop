@@ -36,8 +36,9 @@ pretend loss function and prints the best settings found.
 - [x] Search space with several parameters (Kshetra)
 - [x] Categorical parameters
 - [x] Ask/tell API and Sampler trait
+- [x] Save and load a Yatra as JSON
 - [ ] Grid search over a Kshetra
-- [ ] Trial history and SQLite storage
+- [ ] SQLite storage
 - [ ] Python bindings
 
 ## License

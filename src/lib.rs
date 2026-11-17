@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 pub mod random;
 pub mod sampler;
 pub mod space;
 /// Disha (दिशा, "direction"): which way is "better"?
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Disha {
     /// Fedi (फेदी, "foot of the hill"): lower y is better (for example, loss).
     Fedi,
