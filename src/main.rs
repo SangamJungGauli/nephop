@@ -1,4 +1,4 @@
-use nephop::Direction;
+use nephop::Disha;
 use nephop::random::random_search;
 use nephop::space::{Kshetra, Params};
 
@@ -15,7 +15,7 @@ fn main() {
         .int("batch", 8, 256)
         .choice("optimizer", &["adam", "sgd"]);
 
-    let yatra = random_search(&kshetra, loss, 500, 42, Direction::Minimize);
+    let yatra = random_search(&kshetra, loss, 500, 42, Disha::Fedi);
 
     if let Some(lakshya) = yatra.lakshya() {
         println!("Yatra complete: {} paila", yatra.paila.len());
