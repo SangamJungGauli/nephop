@@ -1,7 +1,6 @@
 use crate::Direction;
+use crate::sampler::{RandomSampler, Sampler};
 use crate::space::{Kshetra, Params};
-use rand::SeedableRng;
-use rand::rngs::StdRng;
 
 /// A Paila (पाइला, "step"): one attempt, the settings we tried and the
 /// score `y` they gave.
@@ -36,6 +35,27 @@ impl Yatra {
             Direction::Maximize => finite.max_by(|a, b| a.y.total_cmp(&b.y)),
         }
     }
+
+    /// Sodha (सोध, "ask"): get the next settings to try from the sampler.
+    pub fn sodha(&self, kshetra: &Kshetra, sampler: &mut impl Sampler) -> Params {
+        sampler.sample(kshetra, &self.paila)
+    }
+
+    /// Bhana (भन, "tell"): report the score `y` those settings gave.
+    /// This records a new Paila.
+    pub fn bhana(&mut self, params: Params, y: f64) {
+        self.paila.push(Paila { params, y });
+    }
+
+    /// English name for `sodha`.
+    pub fn ask(&self, kshetra: &Kshetra, sampler: &mut impl Sampler) -> Params {
+        self.sodha(kshetra, sampler)
+    }
+
+    /// English name for `bhana`.
+    pub fn tell(&mut self, params: Params, y: f64) {
+        self.bhana(params, y)
+    }
 }
 
 /// Take `n_paila` random steps through the `kshetra`, scoring each
@@ -50,12 +70,12 @@ pub fn random_search<F>(
 where
     F: Fn(&Params) -> f64,
 {
-    let mut rng = StdRng::seed_from_u64(seed);
+    let mut sampler = RandomSampler::new(seed);
     let mut yatra = Yatra::new(direction);
     for _ in 0..n_paila {
-        let params = kshetra.sample(&mut rng);
+        let params = yatra.sodha(kshetra, &mut sampler);
         let y = objective(&params);
-        yatra.paila.push(Paila { params, y });
+        yatra.bhana(params, y);
     }
     yatra
 }
@@ -161,5 +181,30 @@ mod tests {
     #[should_panic(expected = "need at least one choice")]
     fn empty_choice_list_is_rejected() {
         let _ = Kshetra::new().choice("x", &[]);
+    }
+
+    #[test]
+    fn sodha_bhana_matches_random_search() {
+        let kshetra = xy_space();
+        let mut sampler = RandomSampler::new(7);
+        let mut yatra = Yatra::new(Direction::Minimize);
+        for _ in 0..10 {
+            let params = yatra.sodha(&kshetra, &mut sampler);
+            let y = bowl(&params);
+            yatra.bhana(params, y);
+        }
+        let expected = random_search(&kshetra, bowl, 10, 7, Direction::Minimize);
+        assert_eq!(yatra.paila, expected.paila);
+    }
+
+    #[test]
+    fn ask_and_tell_are_the_english_names() {
+        let kshetra = xy_space();
+        let mut sampler = RandomSampler::new(1);
+        let mut yatra = Yatra::new(Direction::Minimize);
+        let params = yatra.ask(&kshetra, &mut sampler);
+        yatra.tell(params, 1.5);
+        assert_eq!(yatra.paila.len(), 1);
+        assert_eq!(yatra.paila[0].y, 1.5);
     }
 }
