@@ -12,13 +12,30 @@ for Python and PyTorch.
 Runs a demo that tunes a learning rate, batch size and optimizer on a
 pretend loss function and prints the best settings found.
 
+## Nepali names
+
+| Name | Nepali | Meaning | In other tools |
+|---|---|---|---|
+| Yatra | यात्रा | journey | study |
+| Paila | पाइला | step | trial |
+| Kshetra | क्षेत्र | field | search space |
+| Lakshya | लक्ष्य | goal | best trial |
+| Disha | दिशा | direction | direction |
+| Fedi | फेदी | foot of the hill | minimize |
+| Chuchuro | चुचुरो | peak | maximize |
+| sodha | सोध | ask | ask |
+| bhana | भन | tell | tell |
+
+`Direction`, `Minimize`, `Maximize`, `ask` and `tell` also work.
+
+
 ## Roadmap
 
 - [x] Random search
-- [x] Direction (minimize or maximize)
+- [x] Disha (minimize or maximize)
 - [x] Search space with several parameters (Kshetra)
 - [x] Categorical parameters
-- [ ] Ask/tell API and Sampler trait
+- [x] Ask/tell API and Sampler trait
 - [ ] Grid search over a Kshetra
 - [ ] Trial history and SQLite storage
 - [ ] Python bindings
