@@ -10,7 +10,8 @@ for Python and PyTorch.
     cargo run
 
 Runs a demo that tunes a learning rate, batch size and optimizer on a
-pretend loss function and prints the best settings found.
+pretend loss function with grid search and random search, and prints the
+best settings each one found.
 
 ## Nepali names
 
