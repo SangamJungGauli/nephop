@@ -13,6 +13,20 @@ def space():
     )
 
 
+def huge_grid():
+    kshetra = Kshetra()
+    for i in range(70):
+        kshetra.int(f"i{i}", 0, 9)
+    return kshetra
+
+
+def test_full_i64_range_grid():
+    kshetra = Kshetra().int("x", -(2**63), 2**63 - 1)
+    assert kshetra.grid_size(3) == 3
+    xs = [p["x"] for p, _ in grid_search(kshetra, lambda p: 0.0, 3).history()]
+    assert xs[0] == -(2**63) and xs[-1] == 2**63 - 1 and len(xs) == 3
+
+
 def loss(p):
     return (p["lr"] * 100 - 1) ** 2 + ((p["batch"] - 64) / 64) ** 2
 
@@ -105,6 +119,9 @@ def test_load_missing_file_is_oserror():
         lambda: Kshetra().choice("x", []),
         lambda: Kshetra().float("x", 0, 1).int("x", 0, 1),
         lambda: Kshetra().grid_size(1),
+        lambda: huge_grid().grid_size(2),
+        lambda: grid_search(huge_grid(), loss, 2),
+        lambda: Yatra().ask(huge_grid(), GridSampler(2)),
         lambda: GridSampler(1),
         lambda: Yatra("sideways"),
     ],

@@ -112,6 +112,23 @@ mod tests {
     }
 
     #[test]
+    fn full_i64_range_does_not_overflow() {
+        let kshetra = Kshetra::new().int("x", i64::MIN, i64::MAX);
+        assert_eq!(kshetra.grid_size(3), 3);
+        assert_eq!(kshetra.grid_point(3, 0).int("x"), i64::MIN);
+        assert_eq!(kshetra.grid_point(3, 2).int("x"), i64::MAX);
+    }
+
+    #[test]
+    fn uncountable_grid_is_none() {
+        let mut kshetra = Kshetra::new();
+        for i in 0..70 {
+            kshetra = kshetra.int(&format!("i{i}"), 0, 9);
+        }
+        assert_eq!(kshetra.try_grid_size(2), None);
+    }
+
+    #[test]
     #[should_panic(expected = "at least 2 points")]
     fn one_point_grid_is_rejected() {
         let _ = GridSampler::new(1);

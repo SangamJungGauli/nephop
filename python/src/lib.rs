@@ -31,6 +31,13 @@ fn check_points(points: usize) -> PyResult<()> {
     Ok(())
 }
 
+fn grid_size(kshetra: &CoreKshetra, points: usize) -> PyResult<usize> {
+    check_points(points)?;
+    kshetra
+        .try_grid_size(points)
+        .ok_or_else(|| PyValueError::new_err("the grid is too large to count"))
+}
+
 fn params_to_dict<'py>(py: Python<'py>, params: &Params) -> PyResult<Bound<'py, PyDict>> {
     let dict = PyDict::new(py);
     for (name, value) in params.iter() {
@@ -163,8 +170,7 @@ impl Kshetra {
 
     /// How many settings a grid with `points` values per float has.
     fn grid_size(&self, points: usize) -> PyResult<usize> {
-        check_points(points)?;
-        Ok(self.inner.grid_size(points))
+        grid_size(&self.inner, points)
     }
 }
 
@@ -189,6 +195,7 @@ impl RandomSampler {
 #[pyclass(name = "GridSampler")]
 struct GridSampler {
     inner: CoreGrid,
+    points: usize,
 }
 
 #[pymethods]
@@ -198,6 +205,7 @@ impl GridSampler {
         check_points(points)?;
         Ok(Self {
             inner: CoreGrid::new(points),
+            points,
         })
     }
 }
@@ -212,6 +220,7 @@ fn sample_from(
         return Ok(s.inner.sample(kshetra, history));
     }
     if let Ok(mut s) = sampler.extract::<PyRefMut<'_, GridSampler>>() {
+        grid_size(kshetra, s.points)?;
         return Ok(s.inner.sample(kshetra, history));
     }
     Err(PyValueError::new_err(
@@ -350,15 +359,11 @@ fn grid_search(
     points: usize,
     disha: &str,
 ) -> PyResult<Yatra> {
-    check_points(points)?;
+    let n_paila = grid_size(&kshetra.inner, points)?;
     let mut sampler = CoreGrid::new(points);
-    run(
-        py,
-        objective,
-        kshetra.inner.grid_size(points),
-        parse_disha(disha)?,
-        |history| sampler.sample(&kshetra.inner, history),
-    )
+    run(py, objective, n_paila, parse_disha(disha)?, |history| {
+        sampler.sample(&kshetra.inner, history)
+    })
 }
 
 #[pymodule]
