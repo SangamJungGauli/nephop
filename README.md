@@ -39,7 +39,8 @@ p = yatra.ask(kshetra, sampler)
 yatra.tell(p, train(**p))
 ```
 
-Parameters are plain dicts. There is also `grid_search` and
+Parameters are plain dicts. See `python/examples/pytorch_tune.py` for tuning
+a small PyTorch model. There is also `grid_search` and
 `GridSampler`, `yatra.save(path)` and `Yatra.load(path)`.
 
 ## Nepali names

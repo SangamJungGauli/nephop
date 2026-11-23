@@ -53,6 +53,11 @@ def test_ask_tell_loop_and_lakshya():
     assert params in [h[0] for h in yatra.history()]
 
 
+def test_params_come_back_sorted_by_name():
+    p = Yatra().ask(space(), RandomSampler(1))
+    assert list(p) == ["batch", "lr", "optimizer"]
+
+
 def test_maximize_picks_the_highest():
     yatra = Yatra("maximize")
     for y in (1.0, 5.0, 2.0):

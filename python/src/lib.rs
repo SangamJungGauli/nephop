@@ -40,7 +40,10 @@ fn grid_size(kshetra: &CoreKshetra, points: usize) -> PyResult<usize> {
 
 fn params_to_dict<'py>(py: Python<'py>, params: &Params) -> PyResult<Bound<'py, PyDict>> {
     let dict = PyDict::new(py);
-    for (name, value) in params.iter() {
+    // Sorted, so the dict prints in the same order every time.
+    let mut entries: Vec<_> = params.iter().collect();
+    entries.sort_by_key(|(name, _)| *name);
+    for (name, value) in entries {
         match value {
             Value::Float(v) => dict.set_item(name, v)?,
             Value::Int(v) => dict.set_item(name, v)?,
