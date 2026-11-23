@@ -37,7 +37,7 @@ pretend loss function and prints the best settings found.
 - [x] Categorical parameters
 - [x] Ask/tell API and Sampler trait
 - [x] Save and load a Yatra as JSON
-- [ ] Grid search over a Kshetra
+- [x] Grid search over a Kshetra
 - [ ] SQLite storage
 - [ ] Python bindings
 
