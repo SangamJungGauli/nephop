@@ -10,7 +10,7 @@ for Python and PyTorch.
     cargo run
 
 Runs a demo that tunes a learning rate, batch size and optimizer on a
-pretend loss function with grid search and random search, and prints the
+pretend loss function with grid search, random search and TPE, and prints the
 best settings each one found.
 
 ## Use from Python
@@ -69,6 +69,8 @@ a small PyTorch model. There is also `grid_search` and
 - [x] Ask/tell API and Sampler trait
 - [x] Save and load a Yatra as JSON
 - [x] Grid search over a Kshetra
+- [x] TPE sampler (learns from past trials, models parameters together)
+- [ ] TPE in the Python bindings
 - [ ] SQLite storage
 - [x] Python bindings (first slice: space, samplers, ask/tell, save/load)
 

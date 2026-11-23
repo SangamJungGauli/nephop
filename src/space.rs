@@ -69,7 +69,8 @@ impl Param {
         }
     }
 
-    fn sample(&self, rng: &mut StdRng) -> Value {
+    /// Pick one random value for this parameter.
+    pub fn sample(&self, rng: &mut StdRng) -> Value {
         match self {
             Param::Float {
                 low,
@@ -159,6 +160,11 @@ pub struct Kshetra {
 impl Kshetra {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Every parameter with its range, in the order they were added.
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &Param)> {
+        self.params.iter().map(|(n, p)| (n.as_str(), p))
     }
 
     /// Whether a parameter called `name` was already added.
