@@ -25,6 +25,50 @@ pub enum Param {
 }
 
 impl Param {
+    /// The values a grid visits for this parameter. Floats get `points`
+    /// evenly spaced values (on a log scale if `log`), ints get every
+    /// whole number (or `points` of them if the range is wider), and
+    /// categoricals get every choice.
+    fn grid_values(&self, points: usize) -> Vec<Value> {
+        match self {
+            Param::Float { low, high, log } => (0..points)
+                .map(|i| {
+                    if i == 0 {
+                        return Value::Float(*low);
+                    }
+                    if i == points - 1 {
+                        return Value::Float(*high);
+                    }
+                    let t = i as f64 / (points - 1) as f64;
+                    let v = if *log {
+                        (low.ln() + t * (high.ln() - low.ln())).exp()
+                    } else {
+                        low + t * (high - low)
+                    };
+                    // Rounding can push a value a hair outside the range.
+                    Value::Float(v.clamp(*low, *high))
+                })
+                .collect(),
+            Param::Int { low, high } => {
+                let count = (*high - *low) as u128 + 1;
+                if count <= points as u128 {
+                    (*low..=*high).map(Value::Int).collect()
+                } else {
+                    let mut values: Vec<i64> = (0..points)
+                        .map(|i| {
+                            let t = i as f64 / (points - 1) as f64;
+                            (*low as f64 + t * (*high as f64 - *low as f64)).round() as i64
+                        })
+                        .map(|v| v.clamp(*low, *high))
+                        .collect();
+                    values.dedup();
+                    values.into_iter().map(Value::Int).collect()
+                }
+            }
+            Param::Categorical { choices } => choices.iter().cloned().map(Value::Str).collect(),
+        }
+    }
+
     fn sample(&self, rng: &mut StdRng) -> Value {
         match self {
             Param::Float {
@@ -157,6 +201,36 @@ impl Kshetra {
         assert!(!choices.is_empty(), "`{name}`: need at least one choice");
         let choices = choices.iter().map(|c| c.to_string()).collect();
         self.add(name, Param::Categorical { choices })
+    }
+
+    /// How many settings a grid with `points` values per float has.
+    ///
+    /// # Panics
+    /// If `points` is below 2, or the count does not fit in a `usize`.
+    pub fn grid_size(&self, points: usize) -> usize {
+        assert!(points >= 2, "a grid needs at least 2 points per float");
+        self.params
+            .iter()
+            .map(|(_, p)| p.grid_values(points).len())
+            .try_fold(1usize, |total, n| total.checked_mul(n))
+            .expect("the grid is too large to count")
+    }
+
+    /// The `index`-th setting of the grid (the last parameter changes
+    /// fastest). `index` must be below `grid_size(points)`.
+    pub fn grid_point(&self, points: usize, index: usize) -> Params {
+        assert!(points >= 2, "a grid needs at least 2 points per float");
+        let mut rest = index;
+        let mut params = Params::default();
+        for (name, param) in self.params.iter().rev() {
+            let values = param.grid_values(points);
+            params
+                .values
+                .insert(name.clone(), values[rest % values.len()].clone());
+            rest /= values.len();
+        }
+        assert!(rest == 0, "grid index {index} is out of range");
+        params
     }
 
     /// Pick one random value for every parameter.

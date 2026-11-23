@@ -29,6 +29,31 @@ impl Sampler for RandomSampler {
     }
 }
 
+/// Walks through every combination on a grid, one per call. Floats
+/// get `points` values each; ints and categoricals use all their values.
+/// After the last combination it starts over from the first.
+pub struct GridSampler {
+    points: usize,
+    next: usize,
+}
+
+impl GridSampler {
+    /// `points` is how many values to try per float parameter (at least 2).
+    pub fn new(points: usize) -> Self {
+        assert!(points >= 2, "a grid needs at least 2 points per float");
+        Self { points, next: 0 }
+    }
+}
+
+impl Sampler for GridSampler {
+    fn sample(&mut self, kshetra: &Kshetra, _history: &[Paila]) -> Params {
+        let size = kshetra.grid_size(self.points);
+        let params = kshetra.grid_point(self.points, self.next % size);
+        self.next += 1;
+        params
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -41,5 +66,54 @@ mod tests {
         for _ in 0..10 {
             assert_eq!(a.sample(&kshetra, &[]), b.sample(&kshetra, &[]));
         }
+    }
+
+    #[test]
+    fn grid_visits_every_combination_once() {
+        let kshetra = Kshetra::new()
+            .float("x", 0.0, 1.0)
+            .int("n", 1, 2)
+            .choice("opt", &["adam", "sgd"]);
+        assert_eq!(kshetra.grid_size(3), 3 * 2 * 2);
+        let mut sampler = GridSampler::new(3);
+        let mut seen = Vec::new();
+        for _ in 0..12 {
+            let p = sampler.sample(&kshetra, &[]);
+            let key = (
+                p.float("x").to_bits(),
+                p.int("n"),
+                p.choice("opt").to_string(),
+            );
+            assert!(!seen.contains(&key));
+            seen.push(key);
+        }
+        // The 13th call starts over.
+        let again = sampler.sample(&kshetra, &[]);
+        assert_eq!(again, kshetra.grid_point(3, 0));
+    }
+
+    #[test]
+    fn grid_floats_include_both_ends() {
+        let kshetra = Kshetra::new().log_float("lr", 1e-4, 1e-1);
+        let lrs: Vec<f64> = (0..4)
+            .map(|i| kshetra.grid_point(4, i).float("lr"))
+            .collect();
+        assert_eq!(lrs[0], 1e-4);
+        assert_eq!(lrs[3], 1e-1);
+        assert!((lrs[1] - 1e-3).abs() < 1e-9);
+    }
+
+    #[test]
+    fn wide_int_range_is_thinned_to_points() {
+        let kshetra = Kshetra::new().int("batch", 8, 256);
+        assert_eq!(kshetra.grid_size(5), 5);
+        assert_eq!(kshetra.grid_point(5, 0).int("batch"), 8);
+        assert_eq!(kshetra.grid_point(5, 4).int("batch"), 256);
+    }
+
+    #[test]
+    #[should_panic(expected = "at least 2 points")]
+    fn one_point_grid_is_rejected() {
+        let _ = GridSampler::new(1);
     }
 }

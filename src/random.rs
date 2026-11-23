@@ -1,5 +1,5 @@
 use crate::Disha;
-use crate::sampler::{RandomSampler, Sampler};
+use crate::sampler::{GridSampler, RandomSampler, Sampler};
 use crate::space::{Kshetra, Params};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -90,6 +90,22 @@ where
     let mut sampler = RandomSampler::new(seed);
     let mut yatra = Yatra::new(disha);
     for _ in 0..n_paila {
+        let params = yatra.sodha(kshetra, &mut sampler);
+        let y = objective(&params);
+        yatra.bhana(params, y);
+    }
+    yatra
+}
+
+/// Try every combination on a grid over the `kshetra`, with `points`
+/// values per float parameter. Takes `kshetra.grid_size(points)` paila.
+pub fn grid_search<F>(kshetra: &Kshetra, objective: F, points: usize, disha: Disha) -> Yatra
+where
+    F: Fn(&Params) -> f64,
+{
+    let mut sampler = GridSampler::new(points);
+    let mut yatra = Yatra::new(disha);
+    for _ in 0..kshetra.grid_size(points) {
         let params = yatra.sodha(kshetra, &mut sampler);
         let y = objective(&params);
         yatra.bhana(params, y);
@@ -240,6 +256,17 @@ mod tests {
 
         assert_eq!(loaded.disha, yatra.disha);
         assert_eq!(loaded.paila, yatra.paila);
+    }
+
+    #[test]
+    fn grid_search_finds_the_valley_on_the_grid() {
+        // x and y grids of 5 over -10..10 hit -10,-5,0,5,10; best is (5, 0)
+        // for the bowl centred at (3, -1).
+        let yatra = grid_search(&xy_space(), bowl, 5, Disha::Fedi);
+        assert_eq!(yatra.paila.len(), 25);
+        let best = yatra.lakshya().unwrap();
+        assert_eq!(best.params.float("x"), 5.0);
+        assert_eq!(best.params.float("y"), 0.0);
     }
 
     #[test]

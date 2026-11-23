@@ -10,7 +10,8 @@ for Python and PyTorch.
     cargo run
 
 Runs a demo that tunes a learning rate, batch size and optimizer on a
-pretend loss function and prints the best settings found.
+pretend loss function with grid search and random search, and prints the
+best settings each one found.
 
 ## Nepali names
 
@@ -37,7 +38,7 @@ pretend loss function and prints the best settings found.
 - [x] Categorical parameters
 - [x] Ask/tell API and Sampler trait
 - [x] Save and load a Yatra as JSON
-- [ ] Grid search over a Kshetra
+- [x] Grid search over a Kshetra
 - [ ] SQLite storage
 - [ ] Python bindings
 
