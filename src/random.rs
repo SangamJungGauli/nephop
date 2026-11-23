@@ -270,6 +270,19 @@ mod tests {
     }
 
     #[test]
+    fn floats_survive_save_and_load_exactly() {
+        let kshetra = Kshetra::new().log_float("lr", 1e-5, 1e-1);
+        let yatra = random_search(&kshetra, |p| p.float("lr").sin(), 2000, 5, Disha::Fedi);
+
+        let path = std::env::temp_dir().join("nephop_exact_floats_test.json");
+        yatra.save(&path).unwrap();
+        let loaded = Yatra::load(&path).unwrap();
+        std::fs::remove_file(&path).unwrap();
+
+        assert_eq!(loaded.paila, yatra.paila);
+    }
+
+    #[test]
     fn loading_a_missing_file_is_an_error() {
         assert!(Yatra::load("no_such_folder/no_such_file.json").is_err());
     }
