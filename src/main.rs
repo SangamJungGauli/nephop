@@ -1,6 +1,7 @@
 use nephop::Disha;
 use nephop::random::{Yatra, grid_search, random_search};
 use nephop::space::{Kshetra, Params};
+use nephop::tpe::TpeSampler;
 
 fn show(name: &str, yatra: &Yatra) {
     println!("{name} ({} paila):", yatra.paila.len());
@@ -32,8 +33,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Random search with the same number of paila, for a fair comparison.
     let random = random_search(&kshetra, loss, grid.paila.len(), 42, Disha::Fedi);
 
+    // TPE learns from earlier paila, again with the same budget.
+    let mut sampler = TpeSampler::new(42, Disha::Fedi);
+    let mut tpe = Yatra::new(Disha::Fedi);
+    for _ in 0..grid.paila.len() {
+        let params = tpe.ask(&kshetra, &mut sampler);
+        let y = loss(&params);
+        tpe.tell(params, y);
+    }
+
     show("Grid search", &grid);
     show("Random search", &random);
+    show("TPE", &tpe);
 
     random.save("yatra.json")?;
     println!("Saved the random search to yatra.json");

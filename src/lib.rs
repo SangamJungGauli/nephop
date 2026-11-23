@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 pub mod random;
 pub mod sampler;
 pub mod space;
+pub mod tpe;
 /// Disha (दिशा, "direction"): which way is "better"?
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Disha {
