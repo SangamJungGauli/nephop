@@ -10,7 +10,7 @@ use nephop_core::sampler::{GridSampler as CoreGrid, RandomSampler as CoreRandom,
 use nephop_core::space::{Kshetra as CoreKshetra, Params, Value};
 use pyo3::exceptions::{PyOSError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyBool, PyDict};
 
 fn parse_disha(name: &str) -> PyResult<Disha> {
     match name.to_ascii_lowercase().as_str() {
@@ -54,6 +54,12 @@ fn dict_to_params(dict: &Bound<'_, PyDict>) -> PyResult<Params> {
     let mut params = Params::default();
     for (key, value) in dict.iter() {
         let name: String = key.extract()?;
+        // A bool would extract as an int, so refuse it up front.
+        if value.is_instance_of::<PyBool>() {
+            return Err(PyValueError::new_err(format!(
+                "parameter `{name}` must be a float, int or str, not a bool"
+            )));
+        }
         // Try int before float: a Python float never extracts as an int.
         let value = if let Ok(v) = value.extract::<i64>() {
             Value::Int(v)

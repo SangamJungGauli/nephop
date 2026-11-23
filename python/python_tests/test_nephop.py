@@ -136,6 +136,12 @@ def test_tell_rejects_unsupported_value_types():
         Yatra().tell({"x": [1, 2]}, 1.0)
 
 
+@pytest.mark.parametrize("flag", [True, False])
+def test_tell_rejects_bools(flag):
+    with pytest.raises(ValueError, match="bool"):
+        Yatra().tell({"x": flag}, 1.0)
+
+
 def test_ask_rejects_unknown_sampler():
     with pytest.raises(ValueError):
         Yatra().ask(space(), object())
