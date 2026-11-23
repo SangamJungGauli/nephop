@@ -13,6 +13,35 @@ Runs a demo that tunes a learning rate, batch size and optimizer on a
 pretend loss function with grid search and random search, and prints the
 best settings each one found.
 
+## Use from Python
+
+    cd python
+    pip install maturin
+    maturin develop
+
+```python
+from nephop import Kshetra, Yatra, RandomSampler, random_search
+
+kshetra = (
+    Kshetra()
+    .log_float("lr", 1e-5, 1e-1)
+    .int("batch", 8, 256)
+    .choice("optimizer", ["adam", "sgd"])
+)
+
+# One call:
+yatra = random_search(kshetra, lambda p: train(**p), n_paila=50, seed=42)
+params, loss = yatra.lakshya()
+
+# Or ask and tell:
+yatra, sampler = Yatra("minimize"), RandomSampler(42)
+p = yatra.ask(kshetra, sampler)
+yatra.tell(p, train(**p))
+```
+
+Parameters are plain dicts. There is also `grid_search` and
+`GridSampler`, `yatra.save(path)` and `Yatra.load(path)`.
+
 ## Nepali names
 
 | Name | Nepali | Meaning | In other tools |
@@ -40,7 +69,7 @@ best settings each one found.
 - [x] Save and load a Yatra as JSON
 - [x] Grid search over a Kshetra
 - [ ] SQLite storage
-- [ ] Python bindings
+- [x] Python bindings (first slice: space, samplers, ask/tell, save/load)
 
 ## License
 

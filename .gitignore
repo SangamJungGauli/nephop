@@ -1,2 +1,6 @@
 /target
 yatra.json
+.venv/
+__pycache__/
+*.pyd
+*.so

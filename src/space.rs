@@ -101,6 +101,16 @@ pub struct Params {
 }
 
 impl Params {
+    /// Set the value of the parameter called `name`.
+    pub fn insert(&mut self, name: &str, value: Value) {
+        self.values.insert(name.to_string(), value);
+    }
+
+    /// Every parameter name with its value, in no particular order.
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &Value)> {
+        self.values.iter().map(|(k, v)| (k.as_str(), v))
+    }
+
     pub fn get(&self, name: &str) -> Option<Value> {
         self.values.get(name).cloned()
     }
@@ -151,11 +161,13 @@ impl Kshetra {
         Self::default()
     }
 
+    /// Whether a parameter called `name` was already added.
+    pub fn contains(&self, name: &str) -> bool {
+        self.params.iter().any(|(n, _)| n == name)
+    }
+
     fn add(mut self, name: &str, param: Param) -> Self {
-        assert!(
-            !self.params.iter().any(|(n, _)| n == name),
-            "parameter `{name}` was added twice"
-        );
+        assert!(!self.contains(name), "parameter `{name}` was added twice");
         self.params.push((name.to_string(), param));
         self
     }

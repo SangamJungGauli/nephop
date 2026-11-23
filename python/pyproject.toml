@@ -1,0 +1,17 @@
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "nephop"
+version = "0.1.0"
+description = "Nepalese Hyperparameter Optimizer"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.maturin]
+module-name = "nephop"
