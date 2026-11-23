@@ -18,3 +18,26 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+  python:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: cargo clippy -p nephop-python --all-targets -- -D warnings
+      - run: python -m venv .venv
+      - name: Build and test the Python package
+        shell: bash
+        run: |
+          source .venv/bin/activate 2>/dev/null || source .venv/Scripts/activate
+          pip install maturin pytest
+          cd python
+          maturin develop
+          python -m pytest python_tests -q

@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "python"]
+default-members = ["."]
+
 [package]
 name = "nephop"
 version = "0.1.0"
@@ -13,4 +17,4 @@ rust-version = "1.85"
 [dependencies]
 rand = "0.10.3"
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.154"
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

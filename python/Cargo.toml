@@ -1,0 +1,15 @@
+[package]
+name = "nephop-python"
+version = "0.1.0"
+edition = "2024"
+description = "Python bindings for NepHOp"
+license = "MIT"
+publish = false
+
+[lib]
+name = "nephop_python"
+crate-type = ["cdylib"]
+
+[dependencies]
+nephop_core = { package = "nephop", path = ".." }
+pyo3 = { version = "0.30", features = ["extension-module"] }

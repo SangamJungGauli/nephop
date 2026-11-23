@@ -50,7 +50,7 @@ impl Param {
                 })
                 .collect(),
             Param::Int { low, high } => {
-                let count = (*high - *low) as u128 + 1;
+                let count = (*high as i128 - *low as i128) as u128 + 1;
                 if count <= points as u128 {
                     (*low..=*high).map(Value::Int).collect()
                 } else {
@@ -101,6 +101,16 @@ pub struct Params {
 }
 
 impl Params {
+    /// Set the value of the parameter called `name`.
+    pub fn insert(&mut self, name: &str, value: Value) {
+        self.values.insert(name.to_string(), value);
+    }
+
+    /// Every parameter name with its value, in no particular order.
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &Value)> {
+        self.values.iter().map(|(k, v)| (k.as_str(), v))
+    }
+
     pub fn get(&self, name: &str) -> Option<Value> {
         self.values.get(name).cloned()
     }
@@ -151,11 +161,13 @@ impl Kshetra {
         Self::default()
     }
 
+    /// Whether a parameter called `name` was already added.
+    pub fn contains(&self, name: &str) -> bool {
+        self.params.iter().any(|(n, _)| n == name)
+    }
+
     fn add(mut self, name: &str, param: Param) -> Self {
-        assert!(
-            !self.params.iter().any(|(n, _)| n == name),
-            "parameter `{name}` was added twice"
-        );
+        assert!(!self.contains(name), "parameter `{name}` was added twice");
         self.params.push((name.to_string(), param));
         self
     }
@@ -203,16 +215,25 @@ impl Kshetra {
         self.add(name, Param::Categorical { choices })
     }
 
-    /// How many settings a grid with `points` values per float has.
+    /// How many settings a grid with `points` values per float has, or
+    /// None if that number does not fit in a `usize`.
     ///
     /// # Panics
-    /// If `points` is below 2, or the count does not fit in a `usize`.
-    pub fn grid_size(&self, points: usize) -> usize {
+    /// If `points` is below 2.
+    pub fn try_grid_size(&self, points: usize) -> Option<usize> {
         assert!(points >= 2, "a grid needs at least 2 points per float");
         self.params
             .iter()
             .map(|(_, p)| p.grid_values(points).len())
             .try_fold(1usize, |total, n| total.checked_mul(n))
+    }
+
+    /// How many settings a grid with `points` values per float has.
+    ///
+    /// # Panics
+    /// If `points` is below 2, or the count does not fit in a `usize`.
+    pub fn grid_size(&self, points: usize) -> usize {
+        self.try_grid_size(points)
             .expect("the grid is too large to count")
     }
 
